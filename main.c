@@ -8,8 +8,8 @@
 #include <fcntl.h>
 
 //todo usr fseek replace the lseek
-char nop[]={0x90};//ass: nop
-char parasize[] = {0xbd, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe5};//ass: mov $0x00000000, %ebp
+//char nop[]={0x90};//ass: nop
+//char parasize[] = {0xbd, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe5};//ass: mov $0x00000000, %ebp
 
 struct _jump{
     char opcode_mov;
@@ -60,6 +60,7 @@ int main(){
         printf("Move file position to section position fail!\n");
         return 45;
     }
+    int t=(int) p_ehdr->e_shoff - sizeof(elf_ehdr) - (int) p_ehdr->e_phnum * sizeof(elf_phdr);
     char elf_shdr[sizeof(Elf64_Shdr)];//store section headers
     Elf64_Shdr *p_shdr = (Elf64_Shdr *) elf_shdr;
     Elf64_Off entry_section_offset;
@@ -73,17 +74,25 @@ int main(){
             new_entry = p_shdr->sh_addr+p_shdr->sh_size;//set new entry address as section A 's end address
         }
     }
+    char nop[] = {0x90};
+    char hello_world[] = {
+            0xbd,0x00,0x00,0x00,0x00,0xff,0xe5
+           };
 
+    struct jumpto{
+        char data;
+        int addr;
+        short code_jump;
+    };
+    struct jumpto* jump = (struct jumpto*)hello_world;
+    jump->addr = origi_entry; //最初的入口
+    FILE* newfile = fopen("../helloo","w"); ;
+    fwrite(hello_world, sizeof(hello_world),1,newfile);
+    for(int i; i <4096 - sizeof(hello_world);i++)
+    {
+        fwrite(nop, sizeof(nop),1,newfile);
+    }
     //step4: include code into section A
-    struct _jump * jump = (struct _jump *)parasize;
-    jump->addr = origi_entry;
-    //todo fwrite parasize 
-    //todo fwrite nop into 4096
-    //step5: enlarge the size of the section by the length of insert code
-    //step6: change section A 's section header
-    //step7: change headers of all sections which are below section A
-    //step8: change ELF header's entry address aiming to the insert code
-
     fclose(source);
     return 0;
 }
