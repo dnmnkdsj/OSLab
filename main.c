@@ -2,12 +2,8 @@
 // Created by elvis on 5/3/18.
 //
 #include <stdio.h>
-#include <elf.h>
-#include <zconf.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <elf.h>\
 
-//todo usr fseek replace the lseek
 char nop[]={0x90};//ass: nop
 char parasize[] = {0xbd, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe5};//ass: mov $0x00000000, %ebp
 
@@ -18,6 +14,7 @@ struct _jump{
 }__attribute__((packed));
 
 int main(){
+    FILE *target = fopen("../target", "w+");
 
     //step1: find source file's entry address
     FILE *source = fopen("../hello_world", "r");//open source elf file
