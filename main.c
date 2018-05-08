@@ -85,12 +85,6 @@ int main(){
     struct _jump * jump = (struct _jump *)parasize;
     jump->addr = origi_entry;
 
-    //todo fwrite parasize
-    //write(newfile,parasize,sizeof(parasize);
-    //todo fwrite nop into 4096
-    //for(i-0;i<page_size - sizeof(parasize);i++)
-    //write(newfile,nop,1);
-
     //step5: enlarge the size of the segment by the length of insert code
     p_phdr->p_filesz += 4096;
     p_phdr->p_memsz += 4096;
@@ -118,15 +112,10 @@ int main(){
         fwrite(elf_shdrs[i], sizeof(elf_shdr), 1, target);
     }
 
+    //get Elf file size
     fseek(source, 0, SEEK_END);
     long file_size = ftell(source);
     fseek(source, p_ehdr->e_shoff + p_ehdr->e_shnum * sizeof(Elf64_Shdr), SEEK_SET);
-
-    //todo fwrite parasize
-    //write(newfile,parasize,sizeof(parasize);
-    //todo fwrite nop into 4096
-    //for(i-0;i<page_size - sizeof(parasize);i++)
-    //write(newfile,nop,1);
 
     char data_tmp1[new_entry - (p_ehdr->e_shoff + p_ehdr->e_shnum * sizeof(Elf64_Shdr))];
     fread(data_tmp1, sizeof(data_tmp1), 1, source);
