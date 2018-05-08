@@ -121,9 +121,26 @@ int main(){
     fseek(source, 0, SEEK_END);
     long file_size = ftell(source);
     fseek(source, p_ehdr->e_shoff + p_ehdr->e_shnum * sizeof(Elf64_Shdr), SEEK_SET);
-    char data_tmp1[file_size - (p_ehdr->e_shoff + p_ehdr->e_shnum * sizeof(Elf64_Shdr))];
+
+    //todo fwrite parasize
+    //write(newfile,parasize,sizeof(parasize);
+    //todo fwrite nop into 4096
+    //for(i-0;i<page_size - sizeof(parasize);i++)
+    //write(newfile,nop,1);
+
+    char data_tmp1[new_entry - (p_ehdr->e_shoff + p_ehdr->e_shnum * sizeof(Elf64_Shdr))];
     fread(data_tmp1, sizeof(data_tmp1), 1, source);
     fwrite(data_tmp1, sizeof(data_tmp1), 1, target);
+
+    //insert code
+    fwrite(parasize, sizeof(parasize), 1, target);
+    for (int i = 0; i < 4096 - sizeof(parasize); i++) {
+        fwrite(nop, 1, 1, target);
+    }
+
+    char data_tmp2[file_size - (new_entry + 4096)];
+    fread(data_tmp2, sizeof(data_tmp2), 1, source);
+    fwrite(data_tmp2, sizeof(data_tmp2), 1, target);
 
     printf("write file succeed!\n");
 
